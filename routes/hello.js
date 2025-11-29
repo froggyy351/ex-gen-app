@@ -9,10 +9,13 @@ const db = new sqlite3.Database('mydb.db');
 //GETアクセスの処理
 router.get('/', (req, res, next) => {
     db.serialize(() => {
-        //レコードをすべて取り出す
-        db.all("select * from mydata", (err, rows) => {
-            //データベースアクセス完了時の処理
+        var rows = "";
+        db.each("select * from mydata", (err, row) => {
             if (!err) {
+                rows += "<tr><th>" + row.id + "</th><td>" + row.name + "</td></tr>";
+            }
+        }, (err, count) => {
+            if(!err) {
                 var data = {
                     title: 'Hello!',
                     content: rows
@@ -22,6 +25,8 @@ router.get('/', (req, res, next) => {
         });
     });
 });
+
+
 
 // const http = require('https');
 // const parseString = require('xml2js').parseString;
