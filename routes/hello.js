@@ -26,6 +26,7 @@ router.get('/', (req, res, next) => {
     });
 });
 
+//GET処理　Insert
 router.get('/add', (req, res, next) => {
     var data = {
         title: 'Hello/add',
@@ -34,6 +35,7 @@ router.get('/add', (req, res, next) => {
     res.render('hello/add', data);
 });
 
+//POST処理　Insert
 router.post('/add', (req, res, next) => {
     const nm = req.body.name;
     const ml = req.body.mail;
@@ -44,6 +46,7 @@ router.post('/add', (req, res, next) => {
     res.redirect('/hello');
 });
 
+//GET処理　Select
 router.get('/show', (req, res, next) => {
     const id = req.query.id;
     db.serialize(() => {
@@ -60,6 +63,40 @@ router.get('/show', (req, res, next) => {
         });
     });
 });
+
+//GET処理　Update
+router.get('/edit', (req, res, next) => {
+    const id = req.query.id;
+    db.serialize(() => {
+        const q = 'select * from mydata where id = ?';
+        db.get(q, [id], (err, row) => {
+            if(!err) {
+                var data = {
+                    title: 'hello/edit',
+                    content: 'id = ' + id + ' のレコードを編集する',
+                    mydata: row
+                }
+                res.render('hello/edit', data);
+            }
+        });
+    });
+});
+
+//POST処理　Update
+router.post('/edit', (req, res, next) => {
+    const id = req.body.id;
+    const nm = req.body.name;
+    const ml = req.body.mail;
+    const ag = req.body.age;
+    const q = "update mydata set name = ?, mail = ?, age = ? where id = ?";
+    db.serialize(() => {
+        db.run(q, nm, ml, ag, id);
+    });
+    res.redirect('/hello');
+});
+
+
+
 
 // const http = require('https');
 // const parseString = require('xml2js').parseString;
