@@ -26,24 +26,51 @@ router.get('/', (req, res, next) => {
     });
 });
 
+const { check, validationResult} = require('express-validator');
+
 //GET処理　Insert
 router.get('/add', (req, res, next) => {
     var data = {
         title: 'Hello/add',
-        content: '新しいレコードを入力'
+        content: '新しいレコードを入力: ',
+        form: {name:'', mail:'', age:0}
     }
     res.render('hello/add', data);
 });
 
 //POST処理　Insert
-router.post('/add', (req, res, next) => {
-    const nm = req.body.name;
-    const ml = req.body.mail;
-    const ag = req.body.age;
-    db.serialize(() => {
-        db.run('Insert into mydata (name, mail, age) values (?, ?, ?)', nm, ml, ag);
-    });
+router.post('/add',[
+    check('name','NAME は必ず入力してください。').notEmpty().escape(),
+    check('mail','MAIL はメールアドレスを記入してください。').isEmail().escape(),
+    check('age','AGE は年齢(整数)を入力してください)').isInt(),
+    check('age','AGE は0以上120以下で入力してください。').custom(value => {
+        return value >= 0 && value <= 120;
+    })
+], (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        var result = '<ul class="text-danger">';
+        var result_arr = errors.array();
+        for (var n in result_arr) {
+            result += '<li>' + result_arr[n].msg + '</li>'
+        }
+        result += '</ul>';
+        var data = {
+            title: 'Hello/add',
+            content: result,
+            form: req.body
+        }
+        res.render('hello/add', data);
+    } else {
+        const nm = req.body.name;
+        const ml = req.body.mail;
+        const ag = req.body.age;
+        db.serialize(() => {
+            db.run('Insert into mydata (name, mail, age) values (?, ?, ?)', nm, ml, ag);
+        });
     res.redirect('/hello');
+    }
 });
 
 //GET処理　Select
