@@ -6,7 +6,7 @@ const sqlite3 = require('sqlite3');
 //データベースオブジェクトの取得。
 const db = new sqlite3.Database('mydb.db');
 
-//GETアクセスの処理
+//GET処理
 router.get('/', (req, res, next) => {
     db.serialize(() => {
         var rows = "";
@@ -95,6 +95,34 @@ router.post('/edit', (req, res, next) => {
     res.redirect('/hello');
 });
 
+
+//GET処理　delete
+router.get('/delete', (req, res, next) => {
+    const id = req.query.id;
+    db.serialize(() => {
+        const q = 'select * from mydata where id = ?';
+        db.get(q, [id], (err, row) => {
+            if(!err) {
+                var data = {
+                    title: 'Hello/delete',
+                    content: 'id = ' + id + 'のレコードを削除：',
+                    mydata: row
+                }
+                res.render('hello/delete', data);
+            }
+        });
+    });
+});
+
+//POST処理　delete
+router.post('/delete', (req, res, next) => {
+    const id = req.body.id;
+    db.serialize(() => {
+        const q = 'delete from mydata where id = ?'
+        db.run(q, id);
+    });
+    res.redirect('/hello');
+});
 
 
 
