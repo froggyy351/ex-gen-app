@@ -41,4 +41,26 @@ router.get('/find', (req, res, next) => {
   })
 });
 
+router.get('/add', (req, res, next) => {
+  const data = {
+    title: '/Users/Add'
+  }
+  res.render('users/add', data);
+});
+
+router.post('/add', (req, res, next) => {
+  prisma.user.create({
+    data: {
+      name: req.body.name,
+      pass: req.body.pass,
+      mail: req.body.mail,
+      age: +req.body.age
+    }
+  })
+  .then(() => {
+    res.redirect('/users');
+  });
+});
+
+
 module.exports = router;
