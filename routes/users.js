@@ -1,9 +1,44 @@
 var express = require('express');
-var router = express.Router();
+var router = express.Router();''
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+const ps = require('@prisma/client');
+const prisma = new ps.PrismaClient();
+
+router.get('/', (req, res, next) => {
+  const id = +req.query.id;
+  if (!id) {
+    prisma.user.findMany().then(users => {
+      const data = {
+        title: 'Users/Index',
+        content: users
+      }
+      res.render('users/index', data);
+    });
+  } else {
+    prisma.user.findMany({
+      where: { id: {lte : id}}
+    }).then(usrs => {
+      var data  = {
+        title: 'Users/index',
+        content: usrs
+
+      }
+      res.render('users/index', data);
+    });
+  }
+});
+
+router.get('/find', (req, res, next) => {
+  const name = req.query.name;
+  prisma.user.findMany({
+    where: {name: { contains : name }}
+  }).then(usrs => {
+    var data = {
+      title: 'Users/Find',
+      content: usrs
+    }
+    res.render('users/find', data);
+  })
 });
 
 module.exports = router;
