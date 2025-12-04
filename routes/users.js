@@ -4,28 +4,24 @@ var router = express.Router();''
 const ps = require('@prisma/client');
 const prisma = new ps.PrismaClient();
 
-router.get('/', (req, res, next) => {
-  const id = +req.query.id;
-  if (!id) {
-    prisma.user.findMany().then(users => {
-      const data = {
-        title: 'Users/Index',
-        content: users
-      }
-      res.render('users/index', data);
-    });
-  } else {
-    prisma.user.findMany({
-      where: { id: {lte : id}}
-    }).then(usrs => {
-      var data  = {
-        title: 'Users/index',
-        content: usrs
+const pagesize = 3;
+var cursor = 1;
 
-      }
-      res.render('users/index', data);
-    });
-  }
+router.get('/', (req, res, next) => {
+  // const page = req.query.page ? +req.query.page : 0;
+
+  prisma.user.findMany({
+    orderBy: [{ id: 'asc' }],
+    cursor: { id : cursor },
+    take: pagesize
+  }).then(users => {
+    cursor = users[users.length - 1].id;
+    const data = {
+      title: 'Users/Index',
+      content: users
+    }
+    res.render('users/index', data);
+  });
 });
 
 router.get('/find', (req, res, next) => {
