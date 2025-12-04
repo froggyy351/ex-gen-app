@@ -62,5 +62,60 @@ router.post('/add', (req, res, next) => {
   });
 });
 
+//edit.ejsのGET
+router.get('/edit/:id', (req, res, next) => {
+  const id = req.params.id;
+  prisma.user.findUnique(
+    { where: { id : +id } }
+  ).then(usr => {
+    const data = {
+      title: '/Users/edit',
+      user:usr
+    }
+    res.render('users/edit', data);
+  });
+});
+
+
+//edit.ejsのPOST
+router.post('/edit', (req, res, next) => {
+  const {id, pass, name, mail, age} = req.body;
+  prisma.user.update({
+    where: { id : +id },
+    data: {
+      name: name,
+      pass: pass,
+      mail: mail,
+      age : +age
+    }
+  }).then(()=>{
+    res.redirect('/users');
+  });
+});
+
+
+//delete.ejsのGET
+router.get('/delete/:id', (req, res, next) => {
+  const id = req.params.id;
+  prisma.user.findUnique({
+    where: { id : +id }
+  }).then(usr => {
+    const data = {
+      title: '/User/delete',
+      user: usr
+    }
+    res.render('users/delete', data);
+  });
+});
+
+//delete.ejsのPOST
+router.post('/delete', (req, res, next) => {
+  prisma.user.delete({
+    where : { id : +req.body.id }
+  }).then(() => {
+    res.redirect('/users');
+  });
+});
+
 
 module.exports = router;
